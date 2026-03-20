@@ -3,85 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vizusites v5.3</title>
+    <title>Vizusites v5.5 - Painel Seguro</title>
     <style>
-        :root { --neon: #ff6a00; --bg: #0f172a; }
-        body { background: var(--bg); color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .card { width: 90%; max-width: 400px; background: rgba(30, 41, 59, 0.9); padding: 25px; border-radius: 15px; border: 1px solid var(--neon); text-align: center; }
-        input, textarea { width: 100%; background: #000; border: 1px solid #333; padding: 12px; color: #00d2ff; margin-top: 10px; border-radius: 8px; outline: none; }
-        .btn-main { width: 100%; padding: 18px; background: linear-gradient(135deg, var(--neon), #ff8c42); border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; margin-top: 20px; }
-        .hidden { display: none; }
+        :root { --neon: #ff6a00; --blue: #00d2ff; --bg: #0f172a; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--bg); color: white; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        
+        .card { 
+            width: 100%; max-width: 450px; background: rgba(30, 41, 59, 0.95); 
+            padding: 30px; border-radius: 20px; border: 2px solid var(--neon);
+            box-shadow: 0 0 40px rgba(255, 106, 0, 0.2); text-align: center;
+        }
+
+        h1 { color: var(--neon); margin-bottom: 10px; font-size: 24px; text-transform: uppercase; }
+        p { font-size: 12px; color: #888; margin-bottom: 20px; }
+
+        input, textarea { 
+            width: 100%; background: #000; border: 1px solid #333; 
+            padding: 15px; color: var(--blue); margin-top: 10px; border-radius: 10px; outline: none; 
+        }
+        textarea { height: 150px; font-family: monospace; font-size: 12px; }
+
+        .btn-main { 
+            width: 100%; padding: 20px; background: linear-gradient(135deg, var(--neon), #ff8c42); 
+            border: none; border-radius: 12px; color: white; font-weight: 900; 
+            cursor: pointer; margin-top: 20px; text-transform: uppercase;
+        }
+
+        #resultado { 
+            margin-top: 20px; padding: 15px; background: rgba(0, 255, 150, 0.1); 
+            border: 1px solid #00ffaa; border-radius: 10px; display: none;
+        }
+        .hidden { display: none !important; }
+        .token-status { font-size: 10px; margin-top: 10px; color: #555; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div id="login" class="card">
-        <h1 style="color: var(--neon)">VIZUSITES</h1>
-        <input type="password" id="pass" placeholder="ID Único (netchaveapi)">
-        <button class="btn-main" onclick="logar()">ENTRAR</button>
+    <div id="setup-box" class="card">
+        <h1>Configuração</h1>
+        <p>Cole sua nova Chave API do GitHub abaixo para ativar o motor de deploy.</p>
+        <input type="password" id="inputToken" placeholder="ghp_xxxxxxxxxxxx">
+        <button class="btn-main" onclick="configurarToken()">ATIVAR SISTEMA</button>
+        <p style="margin-top:15px">O token fica salvo apenas no seu navegador.</p>
     </div>
 
-    <div id="painel" class="card hidden">
-        <h2 style="font-size: 14px; color: #00d2ff">🚀 REPO ENGINE</h2>
-        <input type="text" id="repo" placeholder="Nome único do site">
-        <textarea id="html" style="height: 150px" placeholder="Cole o HTML aqui..."></textarea>
-        <button class="btn-main" id="btn" onclick="publicar()">PUBLICAR AGORA</button>
-        <div id="res" style="margin-top: 15px; display: none; color: #00ffaa; font-size: 12px;"></div>
+    <div id="app-box" class="card hidden">
+        <h1>Vizusites Repo</h1>
+        <p>Motor GitHub Engine Ativo 🚀</p>
+        
+        <input type="text" id="nomeSite" placeholder="Nome do Projeto (Ex: meu-app-vip)">
+        <textarea id="codigoHtml" placeholder="Cole seu código HTML aqui..."></textarea>
+        
+        <button class="btn-main" id="btnDeploy" onclick="gerarLink()">GERAR LINK DO APLICATIVO</button>
+
+        <div id="resultado">
+            <p style="color: #00ffaa; font-weight: bold; margin-bottom: 10px;">✅ SITE PUBLICADO!</p>
+            <a id="linkFinal" href="#" target="_blank" style="color: var(--blue); word-break: break-all; font-size: 13px;"></a>
+        </div>
+
+        <div class="token-status" onclick="limparTudo()">Limpar Chave e Sair</div>
     </div>
 
     <script>
-        // SE O SEU TOKEN ANTIGO FOI CANCELADO, COLOQUE O NOVO AQUI
-        const TOKEN = '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';
-
-        function logar() {
-            if(document.getElementById('pass').value === "netchaveapi") {
-                localStorage.setItem('vizu_v5_lock', 'ok');
-                document.getElementById('login').classList.add('hidden');
-                document.getElementById('painel').classList.remove('hidden');
+        // Função para salvar o Token e liberar o acesso
+        function configurarToken() {
+            const token = document.getElementById('inputToken').value.trim();
+            if (token.startsWith('ghp_')) {
+                localStorage.setItem('vizu_key', token);
+                alert("✅ Sistema Ativado com Sucesso!");
+                location.reload();
+            } else {
+                alert("❌ Erro: O token deve começar com 'ghp_'.");
             }
         }
 
-        if(localStorage.getItem('vizu_v5_lock')) {
-            document.getElementById('login').classList.add('hidden');
-            document.getElementById('painel').classList.remove('hidden');
-        }
+        // Verifica se já tem token salvo ao carregar
+        window.onload = () => {
+            if (localStorage.getItem('vizu_key')) {
+                document.getElementById('setup-box').classList.add('hidden');
+                document.getElementById('app-box').classList.remove('hidden');
+            }
+        };
 
-        async function publicar() {
-            const nome = document.getElementById('repo').value.trim().toLowerCase().replace(/\s+/g, '-');
-            const code = document.getElementById('html').value;
-            const b = document.getElementById('btn');
-            
-            if(!nome || !code) return alert("Preencha os campos!");
-            b.innerText = "PROCESSANDO...";
+        async function gerarLink() {
+            const token = localStorage.getItem('vizu_key');
+            const nome = document.getElementById('nomeSite').value.trim().toLowerCase().replace(/\s+/g, '-');
+            const html = document.getElementById('codigoHtml').value.trim();
+            const btn = document.getElementById('btnDeploy');
+
+            if (!nome || !html) return alert("Preencha todos os campos!");
+
+            btn.disabled = true;
+            btn.innerText = "CRIANDO NO GITHUB...";
 
             try {
-                const r = await fetch('https://api.github.com/user/repos', {
+                // 1. Criar o Repositório novo
+                const resRepo = await fetch('https://api.github.com/user/repos', {
                     method: 'POST',
-                    headers: { 'Authorization': `token ${TOKEN}` },
+                    headers: { 'Authorization': `token ${token}` },
                     body: JSON.stringify({ name: nome, auto_init: true })
                 });
+                
+                if (resRepo.status === 401) throw new Error("Token Inválido ou Expirado.");
+                if (resRepo.status === 422) throw new Error("Esse nome de site já existe!");
 
-                if(r.status === 422) {
-                    alert("O nome '" + nome + "' já existe no seu GitHub. Escolha outro!");
-                    b.innerText = "PUBLICAR AGORA";
-                    return;
-                }
+                const dataRepo = await resRepo.json();
 
-                const d = await r.json();
-                await fetch(`https://api.github.com/repos/${d.owner.login}/${nome}/contents/index.html`, {
+                // 2. Criar o arquivo index.html dentro do Repo
+                btn.innerText = "ENVIANDO CÓDIGO...";
+                const resFile = await fetch(`https://api.github.com/repos/${dataRepo.owner.login}/${nome}/contents/index.html`, {
                     method: 'PUT',
-                    headers: { 'Authorization': `token ${TOKEN}` },
-                    body: JSON.stringify({ message: "deploy", content: btoa(unescape(encodeURIComponent(code))) })
+                    headers: { 'Authorization': `token ${token}` },
+                    body: JSON.stringify({
+                        message: "Deploy via Vizusites",
+                        content: btoa(unescape(encodeURIComponent(html)))
+                    })
                 });
 
-                const link = `https://raw.githack.com/${d.owner.login}/${nome}/main/index.html`;
-                document.getElementById('res').style.display = 'block';
-                document.getElementById('res').innerHTML = `✅ SUCESSO!<br><a href="${link}" target="_blank" style="color:#00d2ff">${link}</a>`;
-                b.innerText = "SITE PUBLICADO!";
-            } catch(e) {
-                alert("Erro de conexão ou Token inválido.");
-                b.innerText = "PUBLICAR AGORA";
+                if (resFile.ok) {
+                    // 3. Gerar link estável via Githack
+                    const linkFinal = `https://raw.githack.com/${dataRepo.owner.login}/${nome}/main/index.html`;
+                    
+                    document.getElementById('resultado').style.display = 'block';
+                    document.getElementById('linkFinal').href = linkFinal;
+                    document.getElementById('linkFinal').innerText = linkFinal;
+                    btn.innerText = "LINK GERADO!";
+                }
+            } catch (e) {
+                alert("ERRO: " + e.message);
+                btn.disabled = false;
+                btn.innerText = "TENTAR NOVAMENTE";
             }
+        }
+
+        function limparTudo() {
+            localStorage.clear();
+            location.reload();
         }
     </script>
 </body>
