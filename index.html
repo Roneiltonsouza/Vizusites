@@ -3,104 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vizusites v5 - GitHub Engine</title>
+    <title>Vizusites - Painel Oficial</title>
     <style>
-        :root { --orange: #ff6a00; --blue: #00d2ff; --dark: #0f172a; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: radial-gradient(circle at top, #1e293b, var(--dark)); color: white; font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-        .card { width: 95%; max-width: 500px; padding: 30px; border-radius: 20px; background: rgba(30, 41, 59, 0.95); border: 2px solid rgba(255, 106, 0, 0.3); text-align: center; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
-        h1 { background: linear-gradient(135deg, var(--orange), var(--blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px; }
-        input, textarea { width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,106,0,0.2); border-radius: 10px; padding: 15px; color: var(--blue); margin-top: 10px; outline: none; }
+        :root { --laranja: #ff6a00; --azul: #00d2ff; --fundo: #0f172a; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--fundo); color: white; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        
+        .card { 
+            width: 90%; max-width: 450px; background: rgba(30, 41, 59, 0.95); 
+            padding: 30px; border-radius: 15px; border: 2px solid var(--laranja);
+            box-shadow: 0 0 30px rgba(255, 106, 0, 0.2); text-align: center;
+        }
+
+        /* LOGIN */
+        .auth-input { 
+            width: 100%; padding: 15px; background: #000; border: 1px solid #333; 
+            border-radius: 10px; color: var(--azul); font-weight: bold; text-align: center;
+        }
+
+        /* APP */
+        input, textarea { 
+            width: 100%; background: #000; border: 1px solid #333; 
+            padding: 12px; color: var(--azul); margin-top: 10px; border-radius: 8px; outline: none; 
+        }
         textarea { height: 180px; font-family: monospace; }
-        .btn-main { width: 100%; padding: 18px; background: linear-gradient(135deg, var(--orange), #ff8c42); border: none; border-radius: 12px; color: white; font-weight: 800; cursor: pointer; margin-top: 20px; text-transform: uppercase; }
-        .btn-main:hover { transform: scale(1.02); box-shadow: 0 0 25px var(--orange); }
-        #result { margin-top: 25px; padding: 20px; background: rgba(0, 255, 150, 0.1); border: 1px dashed #00ffaa; border-radius: 12px; display: none; }
-        .url { background: #000; padding: 10px; border-radius: 6px; font-size: 11px; color: #00ffaa; word-break: break-all; margin: 10px 0; }
-        .hidden { display: none; }
+
+        /* O BOTÃO QUE VOCÊ PEDIU (VISÍVEL E SEMPRE NA TELA) */
+        .btn-acao { 
+            width: 100%; padding: 20px; background: linear-gradient(135deg, var(--laranja), #ff8c42); 
+            border: none; border-radius: 12px; color: white; font-weight: 900; 
+            cursor: pointer; margin-top: 20px; box-shadow: 0 5px 15px rgba(255, 106, 0, 0.4);
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .btn-acao:hover { transform: scale(1.02); filter: brightness(1.2); }
+
+        #resultado { 
+            margin-top: 20px; padding: 15px; background: rgba(0, 255, 150, 0.1); 
+            border-radius: 8px; border: 1px solid #00ffaa; display: none;
+        }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <div id="login-screen" class="card">
-        <h1>VIZUSITES v5</h1>
-        <input type="text" id="pass" placeholder="Digite netchaveapi">
-        <button class="btn-main" onclick="entrar()">ENTRAR NO PAINEL</button>
+    <div id="login-box" class="card">
+        <h1 style="color: var(--laranja); margin-bottom: 20px;">VIZUSITES</h1>
+        <p style="font-size: 12px; color: #888; margin-bottom: 10px;">ID DE ACESSO REQUERIDO</p>
+        <input type="password" id="idAcesso" class="auth-input" placeholder="Digite seu ID Único">
+        <button class="btn-acao" onclick="conectar()">ENTRAR NO SISTEMA</button>
     </div>
 
-    <div id="app-screen" class="card hidden">
-        <h1>GITHUB REPO ENGINE</h1>
-        <input type="text" id="repoName" placeholder="Nome do Novo Site (ex: site-teste)">
-        <textarea id="htmlInput" placeholder="Cole seu código HTML aqui..."></textarea>
-        <button class="btn-main" id="btnDeploy" onclick="deployRepo()">🚀 PUBLICAR SITE AGORA</button>
+    <div id="app-box" class="card hidden">
+        <h2 style="color: var(--azul); font-size: 16px;">🚀 ENGINE GITHUB ATIVA</h2>
+        
+        <input type="text" id="nomeRepo" placeholder="Nome do Site (ex: site-vip)">
+        <textarea id="codigoHtml" placeholder="Cole seu código HTML completo aqui..."></textarea>
+        
+        <button class="btn-acao" id="btnPublicar" onclick="executarPublicacao()">PUBLICAR SITE AGORA</button>
 
-        <div id="result">
-            <p style="font-size: 11px; color: #00ffaa;">✅ SITE PUBLICADO!</p>
-            <div class="url" id="urlText">Aguardando link...</div>
-            <a id="linkBtn" href="#" target="_blank" style="color:white; font-weight:bold; text-decoration: none; background: #00ffaa33; padding: 10px; border-radius: 5px; display: block; margin-top: 10px;">🌍 ABRIR SITE NOVO</a>
+        <div id="resultado">
+            <p style="color: #00ffaa; font-size: 11px;">✅ SITE NO AR!</p>
+            <a id="linkSite" href="#" target="_blank" style="color: #00d2ff; font-size: 12px; display: block; margin-top: 10px;">ABRIR SITE CRIADO</a>
         </div>
+
+        <button onclick="sair()" style="background: none; border: none; color: #555; font-size: 10px; margin-top: 20px; cursor: pointer;">SAIR DO SISTEMA</button>
     </div>
 
     <script>
-        // TOKEN ATUALIZADO
-        const GITHUB_TOKEN = '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';
+        // TOKEN QUE VOCÊ GEROU
+        const TOKEN_GH = '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';
 
-        function entrar() {
-            if(document.getElementById('pass').value === "netchaveapi") {
-                localStorage.setItem('vizu_v5', 'ok');
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('app-screen').classList.remove('hidden');
+        // 1. LOGIN COM O ID QUE VOCÊ DEFINIU
+        function conectar() {
+            const id = document.getElementById('idAcesso').value;
+            if (id === "netchaveapi") {
+                localStorage.setItem('vizu_login_status', 'autenticado');
+                abrirPainel();
+            } else {
+                alert("❌ ID Único incorreto!");
             }
         }
 
-        if(localStorage.getItem('vizu_v5')) {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('app-screen').classList.remove('hidden');
+        function abrirPainel() {
+            document.getElementById('login-box').classList.add('hidden');
+            document.getElementById('app-box').classList.remove('hidden');
         }
 
-        async function deployRepo() {
-            const name = document.getElementById('repoName').value.trim().toLowerCase().replace(/\s+/g, '-');
-            const html = document.getElementById('htmlInput').value.trim();
-            const btn = document.getElementById('btnDeploy');
+        // 2. TRAVA PARA NÃO DESLOGAR AO FECHAR A TAB
+        window.onload = () => {
+            if (localStorage.getItem('vizu_login_status') === 'autenticado') {
+                abrirPainel();
+            }
+        };
 
-            if(!name || !html) return alert("Preencha o nome e o código!");
+        // 3. FUNÇÃO DE PUBLICAR NO SEU GITHUB
+        async function executarPublicacao() {
+            const nome = document.getElementById('nomeRepo').value.trim().toLowerCase().replace(/\s+/g, '-');
+            const html = document.getElementById('codigoHtml').value.trim();
+            const btn = document.getElementById('btnPublicar');
+
+            if (!nome || !html) return alert("Preencha o nome e o código!");
 
             btn.disabled = true;
-            btn.innerText = "CRIANDO REPOSITÓRIO...";
+            btn.innerText = "HOSPEDANDO...";
 
             try {
-                // 1. Criar o Repositório
-                const repoRes = await fetch('https://api.github.com/user/repos', {
+                // Criar Repo
+                const resRepo = await fetch('https://api.github.com/user/repos', {
                     method: 'POST',
-                    headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: name, auto_init: true })
+                    headers: { 'Authorization': `token ${TOKEN_GH}` },
+                    body: JSON.stringify({ name: nome, auto_init: true })
                 });
-                const repoData = await repoRes.json();
+                const dataRepo = await resRepo.json();
 
-                // 2. Enviar index.html
-                btn.innerText = "ENVIANDO ARQUIVOS...";
-                const fileRes = await fetch(`https://api.github.com/repos/${repoData.owner.login}/${name}/contents/index.html`, {
+                // Enviar HTML
+                const resFile = await fetch(`https://api.github.com/repos/${dataRepo.owner.login}/${nome}/contents/index.html`, {
                     method: 'PUT',
-                    headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
+                    headers: { 'Authorization': `token ${TOKEN_GH}` },
                     body: JSON.stringify({
-                        message: "Deploy via Vizusites",
+                        message: "Vizusites Deploy",
                         content: btoa(unescape(encodeURIComponent(html)))
                     })
                 });
 
-                if(fileRes.ok) {
-                    // Link direto via Githack
-                    const finalUrl = `https://raw.githack.com/${repoData.owner.login}/${name}/main/index.html`;
-                    
-                    document.getElementById('result').style.display = 'block';
-                    document.getElementById('urlText').innerText = finalUrl;
-                    document.getElementById('linkBtn').href = finalUrl;
-                    btn.innerText = "SITE PUBLICADO!";
+                if (resFile.ok) {
+                    const urlFinal = `https://raw.githack.com/${dataRepo.owner.login}/${nome}/main/index.html`;
+                    document.getElementById('resultado').style.display = 'block';
+                    document.getElementById('linkSite').href = urlFinal;
+                    document.getElementById('linkSite').innerText = urlFinal;
+                    btn.innerText = "CONCLUÍDO!";
                 }
             } catch (e) {
-                alert("Erro! Verifique se o nome do site já existe no seu GitHub.");
+                alert("Erro! Pode ser que o nome desse site já exista no seu GitHub.");
                 btn.disabled = false;
-                btn.innerText = "TENTAR NOVAMENTE";
+                btn.innerText = "PUBLICAR SITE AGORA";
             }
+        }
+
+        function sair() {
+            localStorage.clear();
+            location.reload();
         }
     </script>
 </body>
