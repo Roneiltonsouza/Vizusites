@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vizusites v5 - GitHub Repo Engine</title>
+    <title>Vizusites v5 - GitHub Engine</title>
     <style>
         :root { --orange: #ff6a00; --blue: #00d2ff; --dark: #0f172a; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -29,19 +29,19 @@
 
     <div id="app-screen" class="card hidden">
         <h1>GITHUB REPO ENGINE</h1>
-        <input type="text" id="repoName" placeholder="Nome do Projeto (ex: meu-site-novo)">
+        <input type="text" id="repoName" placeholder="Nome do Novo Site (ex: site-teste)">
         <textarea id="htmlInput" placeholder="Cole seu código HTML aqui..."></textarea>
-        <button class="btn-main" id="btnDeploy" onclick="deployRepo()">🚀 CRIAR REPOSITÓRIO E PUBLICAR</button>
+        <button class="btn-main" id="btnDeploy" onclick="deployRepo()">🚀 PUBLICAR SITE AGORA</button>
 
         <div id="result">
-            <p style="font-size: 11px; color: #00ffaa;">✅ SITE PUBLICADO NO GITHUB!</p>
-            <div class="url" id="urlText">URL DO SITE</div>
-            <a id="linkBtn" href="#" target="_blank" style="color:white; font-weight:bold;">🌍 ABRIR SITE</a>
+            <p style="font-size: 11px; color: #00ffaa;">✅ SITE PUBLICADO!</p>
+            <div class="url" id="urlText">Aguardando link...</div>
+            <a id="linkBtn" href="#" target="_blank" style="color:white; font-weight:bold; text-decoration: none; background: #00ffaa33; padding: 10px; border-radius: 5px; display: block; margin-top: 10px;">🌍 ABRIR SITE NOVO</a>
         </div>
     </div>
 
     <script>
-        // TOKEN CONFIGURADO (Precisa da permissão 'repo' no GitHub)
+        // TOKEN ATUALIZADO
         const GITHUB_TOKEN = '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';
 
         function entrar() {
@@ -76,19 +76,19 @@
                 });
                 const repoData = await repoRes.json();
 
-                // 2. Criar o arquivo index.html no Repo
+                // 2. Enviar index.html
                 btn.innerText = "ENVIANDO ARQUIVOS...";
                 const fileRes = await fetch(`https://api.github.com/repos/${repoData.owner.login}/${name}/contents/index.html`, {
                     method: 'PUT',
                     headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        message: "Initial commit by Vizusites",
+                        message: "Deploy via Vizusites",
                         content: btoa(unescape(encodeURIComponent(html)))
                     })
                 });
 
                 if(fileRes.ok) {
-                    // 3. Link via Githack (mais rápido que esperar o GitHub Pages propagar)
+                    // Link direto via Githack
                     const finalUrl = `https://raw.githack.com/${repoData.owner.login}/${name}/main/index.html`;
                     
                     document.getElementById('result').style.display = 'block';
@@ -97,11 +97,11 @@
                     btn.innerText = "SITE PUBLICADO!";
                 }
             } catch (e) {
-                alert("Erro ao criar repositório. Verifique se o nome já existe.");
+                alert("Erro! Verifique se o nome do site já existe no seu GitHub.");
                 btn.disabled = false;
-                btn.innerText = "PUBLICAR AGORA";
+                btn.innerText = "TENTAR NOVAMENTE";
             }
         }
     </script>
 </body>
-              </html>
+</html>
