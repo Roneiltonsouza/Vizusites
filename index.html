@@ -3,146 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vizusites - Painel Oficial</title>
+    <title>Vizusites v5.3</title>
     <style>
-        :root { --laranja: #ff6a00; --azul: #00d2ff; --fundo: #0f172a; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: var(--fundo); color: white; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-        
-        .card { 
-            width: 90%; max-width: 450px; background: rgba(30, 41, 59, 0.95); 
-            padding: 30px; border-radius: 15px; border: 2px solid var(--laranja);
-            box-shadow: 0 0 30px rgba(255, 106, 0, 0.2); text-align: center;
-        }
-
-        /* LOGIN */
-        .auth-input { 
-            width: 100%; padding: 15px; background: #000; border: 1px solid #333; 
-            border-radius: 10px; color: var(--azul); font-weight: bold; text-align: center;
-        }
-
-        /* APP */
-        input, textarea { 
-            width: 100%; background: #000; border: 1px solid #333; 
-            padding: 12px; color: var(--azul); margin-top: 10px; border-radius: 8px; outline: none; 
-        }
-        textarea { height: 180px; font-family: monospace; }
-
-        /* O BOTÃO QUE VOCÊ PEDIU (VISÍVEL E SEMPRE NA TELA) */
-        .btn-acao { 
-            width: 100%; padding: 20px; background: linear-gradient(135deg, var(--laranja), #ff8c42); 
-            border: none; border-radius: 12px; color: white; font-weight: 900; 
-            cursor: pointer; margin-top: 20px; box-shadow: 0 5px 15px rgba(255, 106, 0, 0.4);
-            text-transform: uppercase; letter-spacing: 1px;
-        }
-        .btn-acao:hover { transform: scale(1.02); filter: brightness(1.2); }
-
-        #resultado { 
-            margin-top: 20px; padding: 15px; background: rgba(0, 255, 150, 0.1); 
-            border-radius: 8px; border: 1px solid #00ffaa; display: none;
-        }
-        .hidden { display: none !important; }
+        :root { --neon: #ff6a00; --bg: #0f172a; }
+        body { background: var(--bg); color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .card { width: 90%; max-width: 400px; background: rgba(30, 41, 59, 0.9); padding: 25px; border-radius: 15px; border: 1px solid var(--neon); text-align: center; }
+        input, textarea { width: 100%; background: #000; border: 1px solid #333; padding: 12px; color: #00d2ff; margin-top: 10px; border-radius: 8px; outline: none; }
+        .btn-main { width: 100%; padding: 18px; background: linear-gradient(135deg, var(--neon), #ff8c42); border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <div id="login-box" class="card">
-        <h1 style="color: var(--laranja); margin-bottom: 20px;">VIZUSITES</h1>
-        <p style="font-size: 12px; color: #888; margin-bottom: 10px;">ID DE ACESSO REQUERIDO</p>
-        <input type="password" id="idAcesso" class="auth-input" placeholder="Digite seu ID Único">
-        <button class="btn-acao" onclick="conectar()">ENTRAR NO SISTEMA</button>
+    <div id="login" class="card">
+        <h1 style="color: var(--neon)">VIZUSITES</h1>
+        <input type="password" id="pass" placeholder="ID Único (netchaveapi)">
+        <button class="btn-main" onclick="logar()">ENTRAR</button>
     </div>
 
-    <div id="app-box" class="card hidden">
-        <h2 style="color: var(--azul); font-size: 16px;">🚀 ENGINE GITHUB ATIVA</h2>
-        
-        <input type="text" id="nomeRepo" placeholder="Nome do Site (ex: site-vip)">
-        <textarea id="codigoHtml" placeholder="Cole seu código HTML completo aqui..."></textarea>
-        
-        <button class="btn-acao" id="btnPublicar" onclick="executarPublicacao()">PUBLICAR SITE AGORA</button>
-
-        <div id="resultado">
-            <p style="color: #00ffaa; font-size: 11px;">✅ SITE NO AR!</p>
-            <a id="linkSite" href="#" target="_blank" style="color: #00d2ff; font-size: 12px; display: block; margin-top: 10px;">ABRIR SITE CRIADO</a>
-        </div>
-
-        <button onclick="sair()" style="background: none; border: none; color: #555; font-size: 10px; margin-top: 20px; cursor: pointer;">SAIR DO SISTEMA</button>
+    <div id="painel" class="card hidden">
+        <h2 style="font-size: 14px; color: #00d2ff">🚀 REPO ENGINE</h2>
+        <input type="text" id="repo" placeholder="Nome único do site">
+        <textarea id="html" style="height: 150px" placeholder="Cole o HTML aqui..."></textarea>
+        <button class="btn-main" id="btn" onclick="publicar()">PUBLICAR AGORA</button>
+        <div id="res" style="margin-top: 15px; display: none; color: #00ffaa; font-size: 12px;"></div>
     </div>
 
     <script>
-        // TOKEN QUE VOCÊ GEROU
-        const TOKEN_GH = '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';
+        // SE O SEU TOKEN ANTIGO FOI CANCELADO, COLOQUE O NOVO AQUI
+        const TOKEN = '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';
 
-        // 1. LOGIN COM O ID QUE VOCÊ DEFINIU
-        function conectar() {
-            const id = document.getElementById('idAcesso').value;
-            if (id === "netchaveapi") {
-                localStorage.setItem('vizu_login_status', 'autenticado');
-                abrirPainel();
-            } else {
-                alert("❌ ID Único incorreto!");
+        function logar() {
+            if(document.getElementById('pass').value === "netchaveapi") {
+                localStorage.setItem('vizu_v5_lock', 'ok');
+                document.getElementById('login').classList.add('hidden');
+                document.getElementById('painel').classList.remove('hidden');
             }
         }
 
-        function abrirPainel() {
-            document.getElementById('login-box').classList.add('hidden');
-            document.getElementById('app-box').classList.remove('hidden');
+        if(localStorage.getItem('vizu_v5_lock')) {
+            document.getElementById('login').classList.add('hidden');
+            document.getElementById('painel').classList.remove('hidden');
         }
 
-        // 2. TRAVA PARA NÃO DESLOGAR AO FECHAR A TAB
-        window.onload = () => {
-            if (localStorage.getItem('vizu_login_status') === 'autenticado') {
-                abrirPainel();
-            }
-        };
-
-        // 3. FUNÇÃO DE PUBLICAR NO SEU GITHUB
-        async function executarPublicacao() {
-            const nome = document.getElementById('nomeRepo').value.trim().toLowerCase().replace(/\s+/g, '-');
-            const html = document.getElementById('codigoHtml').value.trim();
-            const btn = document.getElementById('btnPublicar');
-
-            if (!nome || !html) return alert("Preencha o nome e o código!");
-
-            btn.disabled = true;
-            btn.innerText = "HOSPEDANDO...";
+        async function publicar() {
+            const nome = document.getElementById('repo').value.trim().toLowerCase().replace(/\s+/g, '-');
+            const code = document.getElementById('html').value;
+            const b = document.getElementById('btn');
+            
+            if(!nome || !code) return alert("Preencha os campos!");
+            b.innerText = "PROCESSANDO...";
 
             try {
-                // Criar Repo
-                const resRepo = await fetch('https://api.github.com/user/repos', {
+                const r = await fetch('https://api.github.com/user/repos', {
                     method: 'POST',
-                    headers: { 'Authorization': `token ${TOKEN_GH}` },
+                    headers: { 'Authorization': `token ${TOKEN}` },
                     body: JSON.stringify({ name: nome, auto_init: true })
                 });
-                const dataRepo = await resRepo.json();
 
-                // Enviar HTML
-                const resFile = await fetch(`https://api.github.com/repos/${dataRepo.owner.login}/${nome}/contents/index.html`, {
+                if(r.status === 422) {
+                    alert("O nome '" + nome + "' já existe no seu GitHub. Escolha outro!");
+                    b.innerText = "PUBLICAR AGORA";
+                    return;
+                }
+
+                const d = await r.json();
+                await fetch(`https://api.github.com/repos/${d.owner.login}/${nome}/contents/index.html`, {
                     method: 'PUT',
-                    headers: { 'Authorization': `token ${TOKEN_GH}` },
-                    body: JSON.stringify({
-                        message: "Vizusites Deploy",
-                        content: btoa(unescape(encodeURIComponent(html)))
-                    })
+                    headers: { 'Authorization': `token ${TOKEN}` },
+                    body: JSON.stringify({ message: "deploy", content: btoa(unescape(encodeURIComponent(code))) })
                 });
 
-                if (resFile.ok) {
-                    const urlFinal = `https://raw.githack.com/${dataRepo.owner.login}/${nome}/main/index.html`;
-                    document.getElementById('resultado').style.display = 'block';
-                    document.getElementById('linkSite').href = urlFinal;
-                    document.getElementById('linkSite').innerText = urlFinal;
-                    btn.innerText = "CONCLUÍDO!";
-                }
-            } catch (e) {
-                alert("Erro! Pode ser que o nome desse site já exista no seu GitHub.");
-                btn.disabled = false;
-                btn.innerText = "PUBLICAR SITE AGORA";
+                const link = `https://raw.githack.com/${d.owner.login}/${nome}/main/index.html`;
+                document.getElementById('res').style.display = 'block';
+                document.getElementById('res').innerHTML = `✅ SUCESSO!<br><a href="${link}" target="_blank" style="color:#00d2ff">${link}</a>`;
+                b.innerText = "SITE PUBLICADO!";
+            } catch(e) {
+                alert("Erro de conexão ou Token inválido.");
+                b.innerText = "PUBLICAR AGORA";
             }
-        }
-
-        function sair() {
-            localStorage.clear();
-            location.reload();
         }
     </script>
 </body>
