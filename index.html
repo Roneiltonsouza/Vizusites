@@ -3,143 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vizusites v5.5 - Painel Seguro</title>
+    <title>Vizusites v5.6</title>
     <style>
         :root { --neon: #ff6a00; --blue: #00d2ff; --bg: #0f172a; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
         body { background: var(--bg); color: white; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        
-        .card { 
-            width: 100%; max-width: 450px; background: rgba(30, 41, 59, 0.95); 
-            padding: 30px; border-radius: 20px; border: 2px solid var(--neon);
-            box-shadow: 0 0 40px rgba(255, 106, 0, 0.2); text-align: center;
-        }
-
-        h1 { color: var(--neon); margin-bottom: 10px; font-size: 24px; text-transform: uppercase; }
-        p { font-size: 12px; color: #888; margin-bottom: 20px; }
-
-        input, textarea { 
-            width: 100%; background: #000; border: 1px solid #333; 
-            padding: 15px; color: var(--blue); margin-top: 10px; border-radius: 10px; outline: none; 
-        }
-        textarea { height: 150px; font-family: monospace; font-size: 12px; }
-
-        .btn-main { 
-            width: 100%; padding: 20px; background: linear-gradient(135deg, var(--neon), #ff8c42); 
-            border: none; border-radius: 12px; color: white; font-weight: 900; 
-            cursor: pointer; margin-top: 20px; text-transform: uppercase;
-        }
-
-        #resultado { 
-            margin-top: 20px; padding: 15px; background: rgba(0, 255, 150, 0.1); 
-            border: 1px solid #00ffaa; border-radius: 10px; display: none;
-        }
+        .card { width: 100%; max-width: 400px; background: rgba(30, 41, 59, 0.95); padding: 30px; border-radius: 20px; border: 2px solid var(--neon); text-align: center; }
+        input, textarea { width: 100%; background: #000; border: 1px solid #333; padding: 15px; color: var(--blue); margin-top: 10px; border-radius: 10px; outline: none; }
+        .btn-main { width: 100%; padding: 20px; background: linear-gradient(135deg, var(--neon), #ff8c42); border: none; border-radius: 12px; color: white; font-weight: 900; cursor: pointer; margin-top: 20px; text-transform: uppercase; }
+        #res { margin-top: 20px; padding: 15px; background: rgba(0, 255, 150, 0.1); border: 1px solid #00ffaa; border-radius: 10px; display: none; font-size: 12px; }
         .hidden { display: none !important; }
-        .token-status { font-size: 10px; margin-top: 10px; color: #555; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div id="setup-box" class="card">
-        <h1>Configuração</h1>
-        <p>Cole sua nova Chave API do GitHub abaixo para ativar o motor de deploy.</p>
-        <input type="password" id="inputToken" placeholder="ghp_xxxxxxxxxxxx">
-        <button class="btn-main" onclick="configurarToken()">ATIVAR SISTEMA</button>
-        <p style="margin-top:15px">O token fica salvo apenas no seu navegador.</p>
+    <div id="setup" class="card">
+        <h1 style="color:var(--neon)">CONFIGURAÇÃO</h1>
+        <p style="font-size:11px; color:#888; margin-top:10px">Cole sua nova Chave ghp_ abaixo</p>
+        <input type="password" id="tk" placeholder="ghp_xxxxxxxxxxxx">
+        <button class="btn-main" onclick="save()">ATIVAR AGORA</button>
     </div>
 
-    <div id="app-box" class="card hidden">
-        <h1>Vizusites Repo</h1>
-        <p>Motor GitHub Engine Ativo 🚀</p>
-        
-        <input type="text" id="nomeSite" placeholder="Nome do Projeto (Ex: meu-app-vip)">
-        <textarea id="codigoHtml" placeholder="Cole seu código HTML aqui..."></textarea>
-        
-        <button class="btn-main" id="btnDeploy" onclick="gerarLink()">GERAR LINK DO APLICATIVO</button>
-
-        <div id="resultado">
-            <p style="color: #00ffaa; font-weight: bold; margin-bottom: 10px;">✅ SITE PUBLICADO!</p>
-            <a id="linkFinal" href="#" target="_blank" style="color: var(--blue); word-break: break-all; font-size: 13px;"></a>
-        </div>
-
-        <div class="token-status" onclick="limparTudo()">Limpar Chave e Sair</div>
+    <div id="app" class="card hidden">
+        <h1 style="color:var(--blue)">VIZUSITES REPO</h1>
+        <input type="text" id="name" placeholder="Nome do site (ex: site-teste-hoje)">
+        <textarea id="html" placeholder="Cole o código HTML aqui..."></textarea>
+        <button class="btn-main" id="go" onclick="deploy()">GERAR LINK</button>
+        <div id="res"></div>
+        <p onclick="localStorage.clear(); location.reload()" style="color:#555; font-size:10px; margin-top:20px; cursor:pointer">Trocar Token</p>
     </div>
 
     <script>
-        // Função para salvar o Token e liberar o acesso
-        function configurarToken() {
-            const token = document.getElementById('inputToken').value.trim();
-            if (token.startsWith('ghp_')) {
-                localStorage.setItem('vizu_key', token);
-                alert("✅ Sistema Ativado com Sucesso!");
-                location.reload();
-            } else {
-                alert("❌ Erro: O token deve começar com 'ghp_'.");
-            }
+        function save() {
+            const t = document.getElementById('tk').value.trim();
+            if(t.startsWith('ghp_')) { localStorage.setItem('v_tk', t); location.reload(); }
+            else { alert("Token deve começar com ghp_"); }
         }
 
-        // Verifica se já tem token salvo ao carregar
-        window.onload = () => {
-            if (localStorage.getItem('vizu_key')) {
-                document.getElementById('setup-box').classList.add('hidden');
-                document.getElementById('app-box').classList.remove('hidden');
-            }
-        };
+        if(localStorage.getItem('v_tk')) {
+            document.getElementById('setup').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+        }
 
-        async function gerarLink() {
-            const token = localStorage.getItem('vizu_key');
-            const nome = document.getElementById('nomeSite').value.trim().toLowerCase().replace(/\s+/g, '-');
-            const html = document.getElementById('codigoHtml').value.trim();
-            const btn = document.getElementById('btnDeploy');
+        async function deploy() {
+            const token = localStorage.getItem('v_tk');
+            const nome = document.getElementById('name').value.trim().toLowerCase().replace(/\s+/g, '-');
+            const code = document.getElementById('html').value;
+            const b = document.getElementById('go');
+            const rDiv = document.getElementById('res');
 
-            if (!nome || !html) return alert("Preencha todos os campos!");
-
-            btn.disabled = true;
-            btn.innerText = "CRIANDO NO GITHUB...";
+            if(!nome || !code) return alert("Preencha tudo!");
+            b.innerText = "VERIFICANDO TOKEN...";
+            b.disabled = true;
 
             try {
-                // 1. Criar o Repositório novo
-                const resRepo = await fetch('https://api.github.com/user/repos', {
+                // TESTE DE TOKEN ANTES DE TUDO
+                const userRes = await fetch('https://api.github.com/user', {
+                    headers: { 'Authorization': `token ${token}` }
+                });
+                
+                if(!userRes.ok) throw new Error("TOKEN INVÁLIDO OU EXPIRADO! Gere um novo com a opção 'repo' marcada.");
+                const userData = await userRes.json();
+
+                b.innerText = "CRIANDO REPOSITÓRIO...";
+                const repoRes = await fetch('https://api.github.com/user/repos', {
                     method: 'POST',
                     headers: { 'Authorization': `token ${token}` },
                     body: JSON.stringify({ name: nome, auto_init: true })
                 });
-                
-                if (resRepo.status === 401) throw new Error("Token Inválido ou Expirado.");
-                if (resRepo.status === 422) throw new Error("Esse nome de site já existe!");
 
-                const dataRepo = await resRepo.json();
+                if(repoRes.status === 422) throw new Error("ESTE NOME JÁ EXISTE! Use um nome diferente.");
+                const repoData = await repoRes.json();
 
-                // 2. Criar o arquivo index.html dentro do Repo
-                btn.innerText = "ENVIANDO CÓDIGO...";
-                const resFile = await fetch(`https://api.github.com/repos/${dataRepo.owner.login}/${nome}/contents/index.html`, {
+                b.innerText = "ENVIANDO SITE...";
+                await fetch(`https://api.github.com/repos/${userData.login}/${nome}/contents/index.html`, {
                     method: 'PUT',
                     headers: { 'Authorization': `token ${token}` },
-                    body: JSON.stringify({
-                        message: "Deploy via Vizusites",
-                        content: btoa(unescape(encodeURIComponent(html)))
-                    })
+                    body: JSON.stringify({ message: "Vizusites", content: btoa(unescape(encodeURIComponent(code))) })
                 });
 
-                if (resFile.ok) {
-                    // 3. Gerar link estável via Githack
-                    const linkFinal = `https://raw.githack.com/${dataRepo.owner.login}/${nome}/main/index.html`;
-                    
-                    document.getElementById('resultado').style.display = 'block';
-                    document.getElementById('linkFinal').href = linkFinal;
-                    document.getElementById('linkFinal').innerText = linkFinal;
-                    btn.innerText = "LINK GERADO!";
-                }
-            } catch (e) {
-                alert("ERRO: " + e.message);
-                btn.disabled = false;
-                btn.innerText = "TENTAR NOVAMENTE";
+                const link = `https://raw.githack.com/${userData.login}/${nome}/main/index.html`;
+                rDiv.style.display = 'block';
+                rDiv.innerHTML = `✅ SITE NO AR!<br><a href="${link}" target="_blank" style="color:var(--blue)">${link}</a>`;
+                b.innerText = "SUCESSO!";
+            } catch(e) {
+                alert(e.message);
+                b.disabled = false;
+                b.innerText = "TENTAR NOVAMENTE";
             }
-        }
-
-        function limparTudo() {
-            localStorage.clear();
-            location.reload();
         }
     </script>
 </body>
