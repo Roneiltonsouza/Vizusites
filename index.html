@@ -11,66 +11,88 @@
         
         .card { 
             width: 100%; max-width: 420px; background: rgba(30, 41, 59, 0.95); 
-            padding: 30px; border-radius: 20px; border: 2px solid var(--neon);
-            box-shadow: 0 0 30px rgba(255, 106, 0, 0.2); text-align: center;
+            padding: 40px 30px; border-radius: 20px; border: 2px solid var(--neon);
+            box-shadow: 0 0 40px rgba(255, 106, 0, 0.3); text-align: center;
         }
 
-        h1 { color: var(--neon); font-size: 22px; text-transform: uppercase; margin-bottom: 5px; }
+        /* Estilo da Logo Ampliada e Visível */
+        .logo-header {
+            width: 180px; /* Tamanho aumentado */
+            height: auto;
+            margin-bottom: 25px;
+            filter: drop-shadow(0 0 15px var(--neon)); /* Brilho neon intenso */
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        h1 { color: var(--neon); font-size: 22px; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 2px; }
+        
         input, textarea { 
             width: 100%; background: #000; border: 1px solid #333; 
             padding: 15px; color: var(--blue); margin-top: 10px; border-radius: 10px; outline: none; 
+            transition: 0.3s;
         }
+        input:focus, textarea:focus { border-color: var(--neon); box-shadow: 0 0 10px rgba(255, 106, 0, 0.2); }
+        
         textarea { height: 160px; font-family: monospace; font-size: 12px; }
 
         .btn-main { 
             width: 100%; padding: 20px; background: linear-gradient(135deg, var(--neon), #ff8c42); 
             border: none; border-radius: 12px; color: white; font-weight: 900; 
             cursor: pointer; margin-top: 20px; text-transform: uppercase;
+            transition: transform 0.2s;
         }
+        .btn-main:active { transform: scale(0.98); }
 
         #res { 
             margin-top: 20px; padding: 15px; background: rgba(0, 255, 150, 0.1); 
             border: 1px solid #00ffaa; border-radius: 10px; display: none; 
         }
         .hidden { display: none !important; }
-        .footer-link { margin-top: 20px; font-size: 10px; color: #444; cursor: pointer; display: block; }
+        .footer-link { margin-top: 25px; font-size: 11px; color: #555; cursor: pointer; display: block; text-decoration: underline; }
     </style>
 </head>
 <body>
 
     <div id="setup" class="card">
+        <img src="https://i.supaimg.com/6ce5a4d0-a717-4695-8947-6df309d71c4a/b7c748b8-98fd-44b3-b2e0-5669a520b4e9.png" alt="Logo" class="logo-header">
+        
         <h1>CONFIGURAÇÃO</h1>
-        <p style="font-size:11px; color:#888">Insira seu Token GitHub (ghp_...)</p>
-        <input type="password" id="tk" placeholder="Cole sua Chave Aqui">
+        <p style="font-size:12px; color:#888; margin-bottom: 10px;">Insira seu Token GitHub para começar</p>
+        <input type="password" id="tk" placeholder="Cole sua chave ghp_ aqui">
         <button class="btn-main" onclick="save()">ATIVAR MOTOR</button>
     </div>
 
     <div id="app" class="card hidden">
-        <h1>VIZUSITES REPO</h1>
-        <p style="font-size:10px; color: #00ffaa">MOTOR CDN ATIVO (LINK DIRETO) ⚡</p>
-        
-        <input type="text" id="name" placeholder="Nome do Site (ex: meu-app-direto)">
-        <textarea id="html" placeholder="Cole seu código HTML completo aqui..."></textarea>
+        <img src="https://i.supaimg.com/6ce5a4d0-a717-4695-8947-6df309d71c4a/b7c748b8-98fd-44b3-b2e0-5669a520b4e9.png" alt="Logo" class="logo-header">
+
+        <input type="text" id="name" placeholder="Nome do Projeto (sem espaços)">
+        <textarea id="html" placeholder="Cole seu código HTML aqui..."></textarea>
         
         <button class="btn-main" id="go" onclick="deploy()">GERAR LINK DIRETO</button>
 
         <div id="res">
             <p style="color: #00ffaa; font-weight: bold; margin-bottom: 5px;">✅ SITE PUBLICADO!</p>
-            <a id="finalLink" href="#" target="_blank" style="color: var(--blue); font-size: 12px; word-break: break-all; text-decoration: none; font-weight: bold;">ABRIR SITE AGORA</a>
+            <a id="finalLink" href="#" target="_blank" style="color: var(--blue); font-size: 13px; word-break: break-all; text-decoration: none; font-weight: bold;">ABRIR SITE AGORA</a>
         </div>
 
         <span class="footer-link" onclick="localStorage.clear(); location.reload()">Trocar Chave API / Sair</span>
     </div>
 
     <script>
+        // Função para salvar a chave e abrir o menu
         function save() {
             const t = document.getElementById('tk').value.trim();
             if(t.startsWith('ghp_')) {
                 localStorage.setItem('v_key', t);
                 location.reload();
-            } else { alert("Token inválido!"); }
+            } else { 
+                alert("Token inválido! Certifique-se de que ele começa com 'ghp_'."); 
+            }
         }
 
+        // Verifica se a chave já existe para mostrar o menu de deploy
         if(localStorage.getItem('v_key')) {
             document.getElementById('setup').classList.add('hidden');
             document.getElementById('app').classList.remove('hidden');
@@ -89,14 +111,12 @@
             b.innerText = "CRIANDO LINK DIRETO...";
 
             try {
-                // 1. Pegar login do usuário
                 const userRes = await fetch('https://api.github.com/user', {
                     headers: { 'Authorization': `token ${token}` }
                 });
                 const userData = await userRes.json();
-                if(!userRes.ok) throw new Error("Token Inválido.");
+                if(!userRes.ok) throw new Error("Token Inválido ou Expirado.");
 
-                // 2. Criar Repositório
                 const repoRes = await fetch('https://api.github.com/user/repos', {
                     method: 'POST',
                     headers: { 'Authorization': `token ${token}` },
@@ -105,7 +125,6 @@
 
                 if(repoRes.status === 422) throw new Error("Esse nome já existe no seu GitHub!");
 
-                // 3. Enviar Arquivo
                 await fetch(`https://api.github.com/repos/${userData.login}/${nome}/contents/index.html`, {
                     method: 'PUT',
                     headers: { 'Authorization': `token ${token}` },
@@ -115,7 +134,6 @@
                     })
                 });
 
-                // LINK DE PRODUÇÃO (PULA A TELA DE AVISO)
                 const url = `https://rawcdn.githack.com/${userData.login}/${nome}/main/index.html`;
                 
                 rDiv.style.display = 'block';
